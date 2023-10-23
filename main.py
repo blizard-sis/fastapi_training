@@ -29,15 +29,28 @@ def greetings(
             ..., min_length=2, max_length=20,
             title='Полное имя', description='Можно вводить в любом регистре'
         ),
-        surname: str = Query(..., min_length=2, max_length=50),
+        surname: list[str] = Query(..., min_length=2, max_length=50),
         age: Optional[int] = Query(None, gt=4, le=99),
-        is_staff: bool = Query(False, alias='is-staff'),
-        education_level: Optional[EducationLevel] = None, 
+        is_staff: bool = Query(
+            False, alias='is-staff', include_in_schema=False
+        ),
+        education_level: Optional[EducationLevel] = None,
 ) -> dict[str, str]:
-    result = ' '.join([name, surname])
+    """
+    Приветствие пользователя:
+
+    - **name**: имя
+    - **surname**: фамилия или несколько фамилий
+    - **age**: возраст (опционально)
+    - **title**: обращение
+    """
+    surnames = ' '.join(surname)
+    result = ' '.join([name, surnames])
     result = result.title()
     if age is not None:
         result += ', ' + str(age)
+    if education_level is not None:
+        result += ', ' + education_level.lower()
     if is_staff:
         result += ', сотрудник'
     return {'Hello': result}
