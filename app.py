@@ -1,17 +1,13 @@
-from typing import Optional
-
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 
 app = FastAPI()
 
 
-@app.get('/')
-def multiplication(
-        length: int,
-        width: int,
-        depth: Optional[int] = None,
-) -> dict[int]:
-    result = length * width
-    if depth is not None:
-        result *= depth
+@app.get('/math-sum')
+def default(
+        add: list[float] = Query(..., gt=0, lt=10),
+) -> float:
+    result = 0
+    for ad in add:
+        result += ad
     return result
