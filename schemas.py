@@ -1,7 +1,9 @@
+import re
+
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, root_validator, validator
 
 
 class EducationLevel(str, Enum):
@@ -23,3 +25,20 @@ class Person(BaseModel):
     class Config:
         title = 'Класс для приветствия'
         min_anystr_length = 2
+
+    @validator('name')
+    def name_cant_be_numeric(cls, value: str):
+        if value.isnumeric():
+            raise ValueError('Имя не может быть числом')
+        return value
+
+    @root_validator(skip_on_failure=True)
+    def using_different_languages(cls, values):
+        surname = ''.join(values['surname'])
+        checked_value = values['name'] + surname
+        if (re.search('[а-я]', checked_value, re.IGNORECASE)
+                and re.search('[a-z]', checked_value, re.IGNORECASE)):
+            raise ValueError(
+                'Пожалуйста, не смешивайте русские и латинские буквы'
+            )
+        return values
